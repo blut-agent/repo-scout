@@ -1,13 +1,20 @@
 ---
 name: repo-scout
 description: Find and score GitHub repositories for open source contributions based on activity, maintainer responsiveness, and alignment with your interests.
-version: 1.1.0
+version: 1.0.0
 author: BlutAgent
 license: MIT
 metadata:
   hermes:
     tags: [github, open-source, discovery, scoring, contribution]
-    related_skills: [github-auth, github-issues, github-pr-workflow]
+    related_skills: [github-auth, github-issues, github-pr-workflow, skill-graph]
+  manifest:
+    always_load:
+      - CANONICAL.md
+      - context/identity.md
+    context:
+      - context/user.md
+    references: []
 ---
 
 # Repo Scout
@@ -182,31 +189,6 @@ if __name__ == '__main__':
 ```
 
 Make executable: `chmod +x ~/.hermes/skills/github/repo-scout/scripts/score_repos.py`
-
-
-## Security Notes
-
-### Input Validation
-- File paths restricted to `/tmp/` directory
-- Owner/repo format validated against regex `^[a-zA-Z0-9][a-zA-Z0-9._-]{0,99}$`
-- API endpoints validated to start with `/repos/` or `/search/`
-
-### Token Handling
-- Uses `gh` CLI for authentication (token stored securely by gh)
-- Never logs or echoes tokens
-- Token scope should be limited to `public_repo` for read-only operations
-
-### Changelog
-
-### v1.1.0 (Security Hardening)
-- Added input validation for file paths
-- Added owner/repo format validation to prevent injection
-- Added API endpoint validation
-- Added URL validation before API calls
-- Added JSON parse error handling
-
-### v1.0.0
-- Initial release
 
 ## Output Format
 
