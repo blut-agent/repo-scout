@@ -82,10 +82,25 @@ Repos are scored 0-100 across five dimensions:
 
 ### Step 1: Search for Candidates
 
+**WARNING:** The `stars:100..5000` range filter in GitHub search API returns **zero results** even when repos exist in that range — the filter is not supported or works differently than documented.
+
+**Correct approach:** Search without star filter, then filter client-side:
+
 ```bash
-QUERY="language:TypeScript cli good-first-issues:>0 stars:100..5000"
+QUERY="language:TypeScript cli good-first-issues:>0"
 gh api "/search/repositories?q=$QUERY&sort=updated&order=desc&per_page=100" > /tmp/candidates.json
 ```
+
+Then filter candidates in the scoring script by checking `stargazers_count` in the 100-5000 range.
+
+**Alternative:** Use `sort=stars` to get highest-star repos first, then take the first N that fall in range:
+
+```bash
+QUERY="language:TypeScript cli good-first-issues:>0"
+gh api "/search/repositories?q=$QUERY&sort=stars&order=desc&per_page=50" > /tmp/candidates.json
+```
+
+**URL encoding:** Use `+` for spaces in query strings (e.g., `language:python+label:good-first-issue`). Spaces cause "URL can't contain control characters" errors.
 
 ### Step 2: Score Each Repo
 
@@ -241,3 +256,30 @@ Pick by score, not fame
 ```
 
 **Repo Scout turns contribution anxiety into a ranked hit list.**
+
+## Lessons Learned (Week of 2026-04-23)
+
+### What Worked
+- **Client-side star filtering** — searching without the `stars:` filter and filtering client-side is the only reliable way to find repos in the 100-5000 star range.
+- **`sort=stars` as alternative** — when the `stars:` range filter returns zero results, using `sort=stars` and taking the first N that fall in range is a viable alternative.
+- **URL encoding with `+`** — using `+` for spaces in query strings (e.g., `language:python+label:good-first-issue`) avoids "URL can't contain control characters" errors.
+
+### What Didn't Work
+- **`stars:100..5000` range filter** — the GitHub search API returns zero results with this filter despite repos existing in that range. This is a known API limitation. Must search without star filter and filter client-side.
+- **`+` encoding vs spaces** — spaces in query strings cause "URL can't contain control characters" errors. Must use `+` for URL encoding.
+
+### Concrete Fixes Applied
+- Added `stars:` range filter warning with client-side filtering workaround
+- Added URL encoding note (`+` for spaces in query strings)
+
+## Changelog
+
+### v1.2.0 (2026-04-30)
+- Added `Lessons Learned` section — comprehensive week-of-2026-04-23 review
+- Added `stars:` range filter warning with client-side filtering workaround
+- Added URL encoding note (`+` for spaces in query strings)
+
+### v1.1.0 (2026-04-26)
+- Added `metadata:` block to YAML frontmatter
+- Added `related_skills: [github-issues, morning-brief]`
+- Added changelog section
